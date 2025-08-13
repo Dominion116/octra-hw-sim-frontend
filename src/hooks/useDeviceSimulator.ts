@@ -9,6 +9,7 @@ import {
   INITIAL_ADDRESS,
   INITIAL_BALANCE,
 } from "@/utils/constants";
+import { useWebSocket } from './useWebSocket';
 
 const initialDeviceState: DeviceState = {
   isConnected: false,
@@ -32,6 +33,36 @@ export const useDeviceSimulator = () => {
       setLogs((prev) => [...prev.slice(-50), { timestamp, message, type }]);
     },
     []
+  );
+
+  const handleWebSocketMessage = useCallback((message: any) => {
+    console.log('📡 WebSocket message:', message);
+    
+    switch (message.type) {
+      case 'device_connected':
+        addLog(`Device connected via WebSocket`, 'success');
+        break;
+      case 'device_disconnected':
+        addLog(`Device disconnected via WebSocket`, 'warning');
+        break;
+      case 'device_unlocked':
+        addLog(`Device unlocked via WebSocket`, 'success');
+        break;
+      case 'transaction_sign_request':
+        addLog(`Transaction signing requested via WebSocket`, 'info');
+        break;
+      case 'transaction_confirmed':
+        addLog(`Transaction confirmed via WebSocket`, 'success');
+        break;
+      case 'transaction_rejected':
+        addLog(`Transaction rejected via WebSocket`, 'warning');
+        break;
+    }
+  }, [addLog]);
+
+  const { isConnected: wsConnected } = useWebSocket(
+    'ws://localhost:8000/ws',
+    handleWebSocketMessage
   );
 
   const connectDevice = useCallback(async () => {
@@ -180,5 +211,7 @@ export const useDeviceSimulator = () => {
     deviceState,
     logs,
     actions,
+    wsConnected
   };
 };
+

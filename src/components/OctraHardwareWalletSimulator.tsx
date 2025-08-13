@@ -7,7 +7,7 @@ import DeviceDisplay from './DeviceDisplay';
 import ActivityLogs from './ActivityLogs';
 
 export default function OctraHardwareWalletSimulator() {
-  const { selectedDevice, deviceState, logs, actions } = useDeviceSimulator();
+  const { selectedDevice, deviceState, logs, actions, wsConnected } = useDeviceSimulator();
 
   return (
     <div className="min-h-screen bg-black text-white font-sans">
@@ -24,7 +24,10 @@ export default function OctraHardwareWalletSimulator() {
                 <p className="text-sm text-gray-400">Test Octra hardware wallet integration</p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            
+            {/* Status indicators */}
+            <div className="flex items-center space-x-6">
+              {/* Device status */}
               <div className="flex items-center space-x-2">
                 {deviceState.isConnected ? (
                   <Wifi className="w-5 h-5 text-green-400" />
@@ -32,7 +35,15 @@ export default function OctraHardwareWalletSimulator() {
                   <WifiOff className="w-5 h-5 text-gray-500" />
                 )}
                 <span className="text-sm text-gray-400">
-                  {deviceState.isConnected ? 'Connected' : 'Disconnected'}
+                  Device: {deviceState.isConnected ? 'Connected' : 'Disconnected'}
+                </span>
+              </div>
+              
+              {/* WebSocket status */}
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${wsConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`}></div>
+                <span className="text-xs text-gray-400">
+                  WS: {wsConnected ? 'Live' : 'Offline'}
                 </span>
               </div>
             </div>
@@ -40,6 +51,7 @@ export default function OctraHardwareWalletSimulator() {
         </div>
       </div>
 
+      {/* Main content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <DeviceConfiguration 
