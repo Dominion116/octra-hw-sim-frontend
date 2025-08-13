@@ -35,18 +35,22 @@ export const useDeviceSimulator = () => {
   );
 
   const connectDevice = useCallback(async () => {
-    try {
-      const response = await deviceApi.connect(selectedDevice);
-      if (response.success) {
-        setDeviceState((prev) => ({ ...prev, isConnected: true }));
-        addLog(`${selectedDevice} device connected`, "success");
-      } else {
-        addLog(`Connection failed: ${response.message}`, "error");
-      }
-    } catch (error) {
-      addLog(`Connection error: ${error instanceof Error ? error.message : 'Unknown error'}`, "error");
+  try {
+    const response = await deviceApi.connect(selectedDevice);
+    if (response.success) {
+      // Sync backend state with frontend
+      const statusResponse = await deviceApi.getStatus();
+      console.log('Backend status after connect:', statusResponse);
+      
+      setDeviceState((prev) => ({ ...prev, isConnected: true }));
+      addLog(`${selectedDevice} device connected`, "success");
+    } else {
+      addLog(`Connection failed: ${response.message}`, "error");
     }
-  }, [selectedDevice, addLog]);
+  } catch (error) {
+    addLog(`Connection error: ${error instanceof Error ? error.message : 'Unknown error'}`, "error");
+  }
+}, [selectedDevice, addLog]);
 
   const disconnectDevice = useCallback(async () => {
     try {
@@ -87,20 +91,33 @@ export const useDeviceSimulator = () => {
   }, [deviceState.pin, addLog]);
 
   const simulateTransaction = useCallback(async () => {
-    try {
-      const response = await deviceApi.signTransaction();
-      if (response.success) {
-        setDeviceState((prev) => ({
-          ...prev,
-          awaitingConfirmation: true,
-          screen: "confirm",
-        }));
-        addLog("Transaction confirmation requested", "info");
-      }
-    } catch (error) {
-      addLog(`Transaction error: ${error instanceof Error ? error.message : 'Unknown error'}`, "error");
+  try {
+    // Check prerequisites
+    if (!deviceState.isConnected) {
+      addLog("Device not connected", "error");
+      return;
     }
-  }, [addLog]);
+    
+    if (!deviceState.isUnlocked) {
+      addLog("Device not unlocked", "error");
+      return;
+    }
+    
+    const response = await deviceApi.signTransaction();
+    if (response.success) {
+      setDeviceState((prev) => ({
+        ...prev,
+        awaitingConfirmation: true,
+        screen: "confirm",
+      }));
+      addLog("Transaction confirmation requested", "info");
+    } else {
+      addLog(`Transaction failed: ${response.message}`, "error");
+    }
+  } catch (error) {
+    addLog(`Transaction error: ${error instanceof Error ? error.message : 'Unknown error'}`, "error");
+  }
+}, [deviceState.isConnected, deviceState.isUnlocked, addLog]);
 
   const confirmTransaction = useCallback(async () => {
     try {
