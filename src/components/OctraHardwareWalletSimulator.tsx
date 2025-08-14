@@ -5,6 +5,7 @@ import { useDeviceSimulator } from '@/hooks/useDeviceSimulator';
 import DeviceConfiguration from './DeviceConfiguration';
 import DeviceDisplay from './DeviceDisplay';
 import ActivityLogs from './ActivityLogs';
+import FHEDemo from './FHEDemo';
 
 export default function OctraHardwareWalletSimulator() {
   const { selectedDevice, deviceState, logs, actions, wsConnected } = useDeviceSimulator();
@@ -68,6 +69,7 @@ export default function OctraHardwareWalletSimulator() {
             deviceState={deviceState}
           />
           <ActivityLogs logs={logs} />
+          <FHEDemo />
         </div>
       </div>
     </div>

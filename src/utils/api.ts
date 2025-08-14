@@ -61,3 +61,29 @@ export const deviceApi = {
       body: JSON.stringify({ confirmed }),
     }).then((r) => r.json()),
 };
+
+export const fheApi = {
+  encrypt: (value: any, dataType: string = 'integer') =>
+    fetch(`${API_BASE_URL}/api/fhe/encrypt`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value, data_type: dataType })
+    }).then(r => r.json()),
+
+  compute: (operation: string, encryptedValues: any[], parameters: any = {}) =>
+    fetch(`${API_BASE_URL}/api/fhe/compute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        operation,
+        operands: encryptedValues,
+        parameters
+      })
+    }).then(r => r.json()),
+
+  getDemos: () =>
+    fetch(`${API_BASE_URL}/api/fhe/demos`).then(r => r.json()),
+
+  getOperations: () =>
+    fetch(`${API_BASE_URL}/api/fhe/operations`).then(r => r.json())
+};
