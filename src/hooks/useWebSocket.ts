@@ -18,7 +18,7 @@ export const useWebSocket = (url: string, onMessage?: (message: WebSocketMessage
 
       websocket.current.onopen = () => {
         setIsConnected(true);
-        console.log('🔌 WebSocket connected');
+        console.log('🔌 WebSocket connected to production backend');
       };
 
       websocket.current.onmessage = (event) => {
@@ -29,10 +29,10 @@ export const useWebSocket = (url: string, onMessage?: (message: WebSocketMessage
 
       websocket.current.onclose = () => {
         setIsConnected(false);
-        console.log('❌ WebSocket disconnected');
+        console.log('❌ WebSocket disconnected - attempting reconnect...');
         
-        // Auto-reconnect after 3 seconds
-        reconnectTimeoutRef.current = setTimeout(connect, 3000);
+        // Longer reconnect delay for production
+        reconnectTimeoutRef.current = setTimeout(connect, 5000);
       };
 
       websocket.current.onerror = (error) => {
@@ -40,6 +40,8 @@ export const useWebSocket = (url: string, onMessage?: (message: WebSocketMessage
       };
     } catch (error) {
       console.error('WebSocket connection failed:', error);
+      // Retry connection for production
+      setTimeout(connect, 5000);
     }
   }, [url, onMessage]);
 

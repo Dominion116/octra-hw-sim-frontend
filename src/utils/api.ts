@@ -1,4 +1,38 @@
-const API_BASE_URL = "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+
+const fetchWithRetry = async (url: string, options?: RequestInit, retries = 2): Promise<Response> => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url, options);
+      if (response.ok || i === retries - 1) {
+        return response;
+      }
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    } catch (error) {
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+  }
+  throw new Error('Max retries reached');
+};
+
+// export const deviceApi = {
+//   getStatus: () => fetchWithRetry(`${API_BASE_URL}/api/device/status`).then(r => r.json()),
+  
+//   connect: (deviceType: string) => 
+//     fetchWithRetry(`${API_BASE_URL}/api/device/connect`, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({
+//         device_type: deviceType,
+//         name: `${deviceType.charAt(0).toUpperCase() + deviceType.slice(1)} Device`
+//       })
+//     }).then(r => r.json()),
+    
+//   // ... rest of your API methods using fetchWithRetry
+// };
 
 export const deviceApi = {
   getStatus: () =>
@@ -87,3 +121,5 @@ export const fheApi = {
   getOperations: () =>
     fetch(`${API_BASE_URL}/api/fhe/operations`).then(r => r.json())
 };
+
+
